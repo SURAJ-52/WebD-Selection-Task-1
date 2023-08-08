@@ -1,0 +1,142 @@
+<html>
+<head>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="task 1.css">
+  <div class="nav">
+    <a href ="#">Home</a>
+    <a href ="#">Contact</a>
+    <a href ="#">Results</a>
+    <a href ="#">About</a>
+  </div>
+ 
+<title>Task Final</title>
+</head>
+<body>
+
+  <div id="darkModeToggle">
+    <label for="darkModeCheckbox">Dark Mode</label>
+    <input type="checkbox" id="darkModeCheckbox">
+  </div>
+
+  <div id="progressBarContainer"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+      </tr>
+    </thead>
+    <tbody id="questionsTableBody"></tbody>
+  </table>
+  
+
+  <script>
+    const url = "https://test-data-gules.vercel.app/data.json";
+    const darkModeCheckbox = document.getElementById("darkModeCheckbox");
+    const body = document.body;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === true && data.data) {
+          const questionsTableBody = document.getElementById("questionsTableBody");
+          let totalQuestions = 0;
+          let completedQuestions = 0;
+          data.data.forEach(category => {
+            const categoryRow = document.createElement("tr");
+            questionsTableBody.appendChild(categoryRow);
+            totalQuestions += category.ques.length;
+
+            const categoryCell = document.createElement("td");
+            categoryCell.innerHTML = `<button class="accordion">${category.title}</button>`;
+            categoryRow.appendChild(categoryCell);
+
+            const questionRow = document.createElement("tr");
+            questionsTableBody.appendChild(questionRow);
+
+            const questionContent = document.createElement("td");
+            questionContent.className = "panel";
+            questionContent.colSpan = 1; // Set the column span to match the category column
+            questionRow.appendChild(questionContent);
+
+            const questionList = document.createElement("ul");
+
+            category.ques.forEach(question => {
+              const questionItem = document.createElement("li");
+              questionItem.innerHTML = `
+                <label><input type="checkbox" class="checkbox"> ${question.title}</label>
+                <div class="link-group">
+                  <p><a href="${question.yt_link}" target="_blank">YouTube Link</a></p>
+                </div>
+                <div class="link-group">
+                  <p><a href="${question.p1_link}" target="_blank">Problem 1 Link</a></p>
+                </div>
+                <div class="link-group">
+                  <p><a href="${question.p2_link}" target="_blank">Problem 2 Link</a></p>
+                </div>
+              `;
+              questionList.appendChild(questionItem);
+            });
+
+            questionContent.appendChild(questionList);
+
+            const accordionButton = categoryCell.querySelector(".accordion");
+            accordionButton.addEventListener("click", () => {
+              questionContent.classList.toggle("active");
+              if (questionContent.style.display === "block") {
+                questionContent.style.display = "none";
+              } else {
+                questionContent.style.display = "block";
+              }
+            });
+
+            const checkboxes = questionContent.querySelectorAll(".checkbox");
+            checkboxes.forEach(checkbox => {
+              checkbox.addEventListener("change", () => {
+                const questionItem = checkbox.closest("li");
+                if (checkbox.checked) {
+                  questionItem.classList.add("marked");
+                  completedQuestions++;
+                } else {
+                  questionItem.classList.remove("marked");
+                  completedQuestions--;
+                }
+                const markedCheckboxes = questionContent.querySelectorAll(".marked .checkbox");
+                updateProgressBar(completedQuestions, totalQuestions);
+              });
+            });
+            
+          });
+
+        } else {
+          console.log("Error fetching data.");
+        }
+      })
+      .catch(error => {
+        console.error("An error occurred:", error);
+      });
+
+    // Dark mode toggle functionality
+    darkModeCheckbox.addEventListener("change", () => {
+      body.classList.toggle("dark-mode", darkModeCheckbox.checked);
+    });
+    function updateProgressBar(completed, total) {
+  const progressBarContainer = document.getElementById("progressBarContainer");
+  const completionRate = (completed / total) * 100;
+  const progressBarHTML = `
+    <div class="progress">
+      <div class="progress-bar" style="width: ${completionRate}%;"></div>
+    </div>
+    <p>${completionRate.toFixed(2)}% Completed</p>
+  `;
+  progressBarContainer.innerHTML = progressBarHTML;
+
+ 
+}
+  </script>
+
+<footer class="foot">Created by Suraj</footer>
+</body>
+
+</html>
